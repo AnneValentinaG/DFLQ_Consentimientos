@@ -7,14 +7,14 @@ class FileNameUtils {
     required String documentNumber,
     required DateTime createdAt,
   }) {
-    final cleanDocument = sanitize(documentNumber);
+    final cleanDocument = cleanFileName(documentNumber);
     final date = AppDateUtils.formatFileDate(createdAt);
     final time = AppDateUtils.formatFileTime(createdAt);
 
     return '${cleanDocument}_${date}_$time.pdf';
   }
 
-  static String sanitize(String value) {
+  static String cleanFileName(String value) {
     return value
         .trim()
         .replaceAll(RegExp(r'\s+'), '_')
