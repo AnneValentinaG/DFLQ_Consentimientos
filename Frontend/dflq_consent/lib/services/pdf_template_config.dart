@@ -44,7 +44,7 @@ class PdfTemplateConfig {
           fontSize: 10,
         ),
 
-        'documentNumber': PdfFieldPosition(
+        'patientDocument': PdfFieldPosition(
           left: 58,
           top: 158,
           width: 128,
@@ -52,12 +52,28 @@ class PdfTemplateConfig {
           fontSize: 10,
         ),
 
-        'expeditionPlace': PdfFieldPosition(
+        'patientIssuePlace': PdfFieldPosition(
           left: 202,
           top: 158,
           width: 104,
           height: 16,
           fontSize: 10,
+        ),
+
+        'representativeName': PdfFieldPosition(
+          left: 74,
+          top: 186,
+          width: 185,
+          height: 16,
+          fontSize: 9,
+        ),
+
+        'representativeDocument': PdfFieldPosition(
+          left: 337,
+          top: 186,
+          width: 90,
+          height: 16,
+          fontSize: 9,
         ),
 
         'doctorName': PdfFieldPosition(

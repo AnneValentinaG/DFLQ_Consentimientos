@@ -55,17 +55,27 @@ class PdfService {
 
               _buildTextField(
                 position: template.getFieldPosition('patientName'),
-                value: consent.patientName,
+                value: consent.patient.fullName,
               ),
 
               _buildTextField(
-                position: template.getFieldPosition('documentNumber'),
-                value: consent.documentNumber,
+                position: template.getFieldPosition('patientDocument'),
+                value: consent.patient.documentNumber,
               ),
 
               _buildTextField(
-                position: template.getFieldPosition('expeditionPlace'),
-                value: consent.expeditionPlace,
+                position: template.getFieldPosition('patientIssuePlace'),
+                value: consent.patient.documentIssuePlace,
+              ),
+
+              _buildOptionalTextField(
+                position: template.getFieldPosition('representativeName'),
+                value: consent.patient.legalRepresentativeName,
+              ),
+
+              _buildOptionalTextField(
+                position: template.getFieldPosition('representativeDocument'),
+                value: consent.patient.legalRepresentativeDocument,
               ),
 
               _buildTextField(
@@ -76,7 +86,6 @@ class PdfService {
               _buildTextField(
                 position: template.getFieldPosition('procedure'),
                 value: consent.procedure,
-                maxLines: 2,
               ),
 
               _buildTextField(
@@ -85,8 +94,13 @@ class PdfService {
               ),
 
               _buildSignatureField(
-                position: template.getFieldPosition('signature'),
-                signatureBytes: consent.SignatureData,
+                position: template.getFieldPosition('patientSignature'),
+                signatureBytes: consent.signature.pngBytes,
+              ),
+
+              _buildTextField(
+                position: template.getFieldPosition('patientSignatureDocument'),
+                value: consent.patient.documentNumber,
               ),
             ],
           );
@@ -157,6 +171,24 @@ class PdfService {
     );
   }
 
+  pw.Widget _buildOptionalTextField({
+    required PdfFieldPosition position,
+    required String? value,
+    int maxLines = 1,
+  }) {
+    final String cleanValue = value?.trim() ?? '';
+
+    if (cleanValue.isEmpty) {
+      return pw.SizedBox();
+    }
+
+    return _buildTextField(
+      position: position,
+      value: cleanValue,
+      maxLines: maxLines,
+    );
+  }
+
   pw.Widget _buildSignatureField({
     required PdfFieldPosition position,
     required Uint8List signatureBytes,
@@ -180,12 +212,32 @@ class PdfService {
   }
 
   void _validateConsent(SurgeryConsent consent) {
-    if (consent.patientName.trim().isEmpty) {
+    if (consent.patient.fullName.trim().isEmpty) {
       throw ArgumentError('El nombre del paciente no puede estar vacío.');
     }
 
-    if (consent.documentNumber.trim().isEmpty) {
+    if (consent.patient.documentNumber.trim().isEmpty) {
       throw ArgumentError('El documento del paciente no puede estar vacío.');
+    }
+
+    if (consent.patient.documentIssuePlace.trim().isEmpty) {
+      throw ArgumentError(
+        'El lugar de expedición del documento no puede estar vacío.',
+      );
+    }
+
+    if (consent.patient.isMinor && !consent.patient.hasLegalRepresentative) {
+      throw ArgumentError(
+        'El paciente es menor de edad y requiere representante legal.',
+      );
+    }
+
+    if (consent.patient.isMinor &&
+        (consent.patient.legalRepresentativeDocument == null ||
+            consent.patient.legalRepresentativeDocument!.trim().isEmpty)) {
+      throw ArgumentError(
+        'El documento del representante legal no puede estar vacío.',
+      );
     }
 
     if (consent.doctorName.trim().isEmpty) {
@@ -196,7 +248,11 @@ class PdfService {
       throw ArgumentError('El procedimiento no puede estar vacío.');
     }
 
-    if (consent.SignatureData.isEmpty) {
+    if (consent.teeth.trim().isEmpty) {
+      throw ArgumentError('Los dientes no pueden estar vacíos.');
+    }
+
+    if (consent.signature.pngBytes.isEmpty) {
       throw ArgumentError('La firma del paciente no puede estar vacía.');
     }
   }
